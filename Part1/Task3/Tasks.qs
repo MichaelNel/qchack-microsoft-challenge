@@ -2,6 +2,14 @@ namespace QCHack.Task3 {
     open Microsoft.Quantum.Canon;
     open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Convert;
+    open Microsoft.Quantum.Math;
+    open Microsoft.Quantum.Arithmetic;
+    open Microsoft.Quantum.Diagnostics;
+    open Microsoft.Quantum.Arrays;
+
+    function NumVars(truthTable : Bool[]) : Int {
+        return Ceiling(Lg(IntAsDouble(Length(truthTable))));
+    }
 
     // Task 3 (5 points). f(x) = 1 if at least two of three input bits are different - hard version
     //
@@ -25,8 +33,17 @@ namespace QCHack.Task3 {
     // even though they apply single-qubit gates to separate qubits. Make sure you run the test
     // on your solution to check that it passes before you submit the solution!
     operation Task3_ValidTriangle (inputs : Qubit[], output : Qubit) : Unit is Adj+Ctl {
-        let ttCode = IntAsBoolArray(126, 16);
-        
+        let ttCode = IntAsBoolArray(126, 7);
+        let controls = LittleEndian(inputs);
+        // compute number of variables in truthTable
+        let numVars = NumVars(ttCode);
+        EqualityFactI(Length(controls!), numVars, "Unexpected number of truth table variables");
+        // Uses `Enumerated` to both get the index and truthValue without array access
+        for (idx, truthValue) in Enumerated(ttCode) {
+            if truthValue {
+                ApplyControlledOnInt(idx, X, controls!, output);
+            }
+        }
     }
 }
 

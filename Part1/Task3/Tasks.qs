@@ -41,8 +41,7 @@ namespace QCHack.Task3 {
         // Uses `Enumerated` to both get the index and truthValue without array access
         for (idx, truthValue) in Enumerated(ttCode) {
             if truthValue {
-                // ApplyControlledOnInt(idx, X, controls!, output);
-                Controlled X(controls!, output);
+                ApplyControlledOnInt(idx, X, controls!, output);
             }
         }
     }

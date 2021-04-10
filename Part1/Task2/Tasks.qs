@@ -1,6 +1,7 @@
 namespace QCHack.Task2 {
     open Microsoft.Quantum.Canon;
     open Microsoft.Quantum.Intrinsic;
+    open Microsoft.Quantum.Math;
 
     // Task 2 (2 points). f(x) = 1 if at least two of three input bits are different - easy version
     //
@@ -19,12 +20,10 @@ namespace QCHack.Task2 {
     // will be 1/√3|001⟩ ⊗ |1⟩ + 1/√3|110⟩ ⊗ |1⟩ + 1/√3|111⟩ ⊗ |0⟩.
     //
     operation Task2_ValidTriangle (inputs : Qubit[], output : Qubit) : Unit is Adj+Ctl {
-        ApplyControlledOnInt(1, X, inputs, output);
-        ApplyControlledOnInt(2, X, inputs, output);
-        ApplyControlledOnInt(3, X, inputs, output);
-        ApplyControlledOnInt(4, X, inputs, output);
-        ApplyControlledOnInt(5, X, inputs, output);
-        ApplyControlledOnInt(6, X, inputs, output);
+        let max = PowI(2, Length(inputs)) - 2;
+        for value in 1 .. max {
+            ApplyControlledOnInt(value, X, inputs, output);
+        }
     }
 }
 

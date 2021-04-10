@@ -3,11 +3,10 @@ namespace QCHack.Task3 {
     open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Arithmetic;
 
-    // This operation is marked `Adj` to automatically generate an
-    // adjoint variant, so we can call it in the `within` block above.
-    internal operation ApplyParity(controls : Qubit[], target : Qubit) : Unit is Adj {
-        ApplyToEachA(CNOT(_, target), controls);
-    }
+    // operation Oracle_Xor_Reference (queryRegister : Qubit[], target : Qubit) : Unit is Adj {        
+    //     CNOT(queryRegister[0], target);
+    //     CNOT(queryRegister[1], target);
+    // }
 
     // Task 3 (5 points). f(x) = 1 if at least two of three input bits are different - hard version
     //
@@ -32,6 +31,16 @@ namespace QCHack.Task3 {
     // on your solution to check that it passes before you submit the solution!
     operation Task3_ValidTriangle (inputs : Qubit[], output : Qubit) : Unit is Adj+Ctl {
         let controls = LittleEndian(inputs);
+        let N = Length(inputs);
+        use anc = Qubit[N];
+        within{
+            for i in 0..N-1 {
+                // Oracle_Xor_Reference(inputs[i..i+1], anc[i]);
+                CNOT(inputs[i], anc[i]);
+            }
+        }apply{
+            Controlled X(anc, output);
+        }
     }
 }
 

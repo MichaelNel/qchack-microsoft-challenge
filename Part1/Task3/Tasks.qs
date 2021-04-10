@@ -1,10 +1,10 @@
 namespace QCHack.Task3 {
-    open Microsoft.Quantum.Canon;
-    open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Arithmetic;
     open Microsoft.Quantum.Arrays;
     open Microsoft.Quantum.Convert;
+    open Microsoft.Quantum.Canon;
     open Microsoft.Quantum.Diagnostics;
+    open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Math;
 
     /// ## Polarity
@@ -14,7 +14,7 @@ namespace QCHack.Task3 {
 
     newtype Term = Literal[];
 
-    internal operation ApplyTerm(term : Term, controls : LittleEndian, target : Qubit) : Unit {
+    internal operation ApplyTerm(term : Term, controls : LittleEndian, target : Qubit) : Unit is Adj+Ctl {
         // obtain all involved variables
         let indexes = Mapped(LiteralIndex, term!);
         let polarities = Mapped(LiteralPolarity, term!);
@@ -22,6 +22,14 @@ namespace QCHack.Task3 {
         let controlRegister = Subarray(indexes, controls!);
 
         ApplyControlledOnBitString(polarities, X, controlRegister, target);
+    }
+
+    internal function LiteralIndex(literal : Literal) : Int {
+        return literal::Index;
+    }
+
+    internal function LiteralPolarity(literal : Literal) : Bool {
+        return literal::Polarity;
     }
 
     // Task 3 (5 points). f(x) = 1 if at least two of three input bits are different - hard version
@@ -55,7 +63,7 @@ namespace QCHack.Task3 {
 
         // ApplyTerm(_, controls, target) is partial application and returns
         // an operation that takes a single `Term` argument as input
-        ApplyToEach(ApplyTerm(_, controlsLE, output), esopCode);
+        ApplyToEachCA(ApplyTerm(_, controlsLE, output), esopCode);
     }
 }
 

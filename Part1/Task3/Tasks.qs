@@ -1,6 +1,28 @@
 namespace QCHack.Task3 {
     open Microsoft.Quantum.Canon;
     open Microsoft.Quantum.Intrinsic;
+    open Microsoft.Quantum.Arithmetic;
+    open Microsoft.Quantum.Arrays;
+    open Microsoft.Quantum.Convert;
+    open Microsoft.Quantum.Diagnostics;
+    open Microsoft.Quantum.Math;
+
+    /// ## Polarity
+    /// true, if positive literal
+    /// false, if negative literal
+    newtype Literal = (Index : Int, Polarity : Bool);
+
+    newtype Term = Literal[];
+
+    internal operation ApplyTerm(term : Term, controls : LittleEndian, target : Qubit) : Unit {
+        // obtain all involved variables
+        let indexes = Mapped(LiteralIndex, term!);
+        let polarities = Mapped(LiteralPolarity, term!);
+
+        let controlRegister = Subarray(indexes, controls!);
+
+        ApplyControlledOnBitString(polarities, X, controlRegister, target);
+    }
 
     // Task 3 (5 points). f(x) = 1 if at least two of three input bits are different - hard version
     //
@@ -24,7 +46,16 @@ namespace QCHack.Task3 {
     // even though they apply single-qubit gates to separate qubits. Make sure you run the test
     // on your solution to check that it passes before you submit the solution!
     operation Task3_ValidTriangle (inputs : Qubit[], output : Qubit) : Unit is Adj+Ctl {
-        // ...
+        let esopCode = [
+            Term([Literal(0, true), Literal(1, false)]),    // A !B
+            Term([Literal(0, false), Literal(2, true)]),    // !A C
+            Term([Literal(1, true), Literal(2, false)])     // B !C
+        ];
+        let controlsLE = LittleEndian(inputs);
+
+        // ApplyTerm(_, controls, target) is partial application and returns
+        // an operation that takes a single `Term` argument as input
+        ApplyToEach(ApplyTerm(_, controlsLE, output), esopCode);
     }
 }
 

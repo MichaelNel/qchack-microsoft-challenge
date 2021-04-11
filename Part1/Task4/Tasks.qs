@@ -2,6 +2,8 @@ namespace QCHack.Task4 {
     open Microsoft.Quantum.Canon;
     open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Arrays;
+    open Microsoft.Quantum.Diagnostics;
+    open Microsoft.Quantum.Convert;
 
     function isAnEdge (Vtx_a : Int, Vtx_b : Int, edges : (Int, Int)[] ) : Bool {
         for (first,second) in edges {
@@ -12,8 +14,14 @@ namespace QCHack.Task4 {
         return false;
     }
 
-    function getEdgeColour (edge : (Int, Int), edges : (Int, Int)[], colours : Qubit[]) : Qubit {
-        return Qubit();
+    function getEdgeIdx (V_1 : Int, V_2 : Int, edges : (Int, Int)[]) : Int {
+        for idx in 0..Length(edges)-1 {
+            let (first, second) = edges[idx];
+            if ((first == V_1 and second == V_2) or  (first == V_2 and second == V_1)) {
+                return idx;
+            }
+        }
+        return -1;
     }
 
     // Task 4 (12 points). f(x) = 1 if the graph edge coloring is triangle-free
@@ -57,29 +65,62 @@ namespace QCHack.Task4 {
         colorsRegister : Qubit[], 
         target : Qubit
     ) : Unit is Adj+Ctl {
-        let nEdges = Length(edges);
-
-        // Convert the colours to readable format (actual graph coloring).
-        let colours = Chunks(2, colorsRegister);
-
-        // let Triangle[] triangles;
-
-        Message("Start");
+        // Message("Start");
+        // DumpMachine();
+        use ColTriFound = Qubit();
         for (V_1, V_2) in edges {
             for V_idx in 0..V-1 {
                 if(isAnEdge(V_1, V_idx, edges) and isAnEdge(V_2, V_idx, edges)) {
                     // triangle <V_1, V_2, V_idx> is a triangle
-                    // Qubit1 = getEdgeColour(V1 V2)
-                    // Qubit2 = getEdgeColour(V2 V3)
-                    // Qubit3 = getEdgeColour(V1 V3)
-                }
-                
-                // check if [V_1, V_idx] in edges
+                    Message("Triangle found!");
+                    let q1 = colorsRegister[getEdgeIdx(V_1, V_2, edges)];
+                    let q2 = colorsRegister[getEdgeIdx(V_2, V_idx, edges)];
+                    let q3 = colorsRegister[getEdgeIdx(V_1, V_idx, edges)];
+                    // ancilliary qubits
+                    use anc0 = Qubit();
+                    use anc1 = Qubit();
+                    use target_tri = Qubit();
+                    within {
+                        // if a and b are different anc is 1
+                        ApplyControlledOnInt(0, X, [q1], anc0);
+                        ApplyControlledOnInt(0, X, [q2], anc0);
 
-                // if both yes then that's a triangle
-                
+                        // if b and c are different anc1 is 1
+                        ApplyControlledOnInt(0, X, [q2], anc1);
+                        ApplyControlledOnInt(0, X, [q3], anc1);
+
+                        // if anc1 and anc2 are zero then coloured triangle!
+                        DumpMachine();
+                        ApplyControlledOnBitString(IntAsBoolArray(0,2),X,[anc0, anc1],target_tri);
+                        DumpMachine();
+
+                        // if target_tri == 1 we have a coloured triangle
+                        // if target_tri == 0 we don't
+                    } apply {
+                        // set target to one if target_tri is one
+                        // if target is already one don't flip
+                        DumpMachine();
+                        ApplyControlledOnInt(1, X, [target_tri], ColTriFound);
+                        use anc2 = Qubit();
+                        within {
+                            // Apply if either is different
+                            ApplyControlledOnInt(1, X, [target_tri], anc2);
+                            ApplyControlledOnInt(1, X, [ColTriFound], anc2);
+                            // ApplyControlledOnBitString(IntAsBoolArray(3,2),X,[target_tri, ColTriFound],anc2);
+                            // ApplyAnd(target_tri,ColTriFound,anc2);
+                            DumpMachine();
+                        } apply {
+                            CNOT(anc2,target);
+                        }
+                        DumpMachine();
+                    }
+                }
             }
         }
+        // CNOT(ColTriFound,target);
+        // CNOT(target,ColTriFound);
+        X(target);
+        // DumpMachine();
     }
 }
 

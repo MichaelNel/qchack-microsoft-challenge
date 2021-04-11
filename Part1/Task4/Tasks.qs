@@ -1,6 +1,20 @@
 namespace QCHack.Task4 {
     open Microsoft.Quantum.Canon;
     open Microsoft.Quantum.Intrinsic;
+    open Microsoft.Quantum.Arrays;
+
+    function isAnEdge (Vtx_a : Int, Vtx_b : Int, edges : (Int, Int)[] ) : Bool {
+        for (first,second) in edges {
+            if ((first == Vtx_a and second == Vtx_b) or  (first == Vtx_b and second == Vtx_a)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function getEdgeColour (edge : (Int, Int), edges : (Int, Int)[], colours : Qubit[]) : Qubit {
+        return Qubit();
+    }
 
     // Task 4 (12 points). f(x) = 1 if the graph edge coloring is triangle-free
     // 
@@ -43,7 +57,29 @@ namespace QCHack.Task4 {
         colorsRegister : Qubit[], 
         target : Qubit
     ) : Unit is Adj+Ctl {
-        // ...
+        let nEdges = Length(edges);
+
+        // Convert the colours to readable format (actual graph coloring).
+        let colours = Chunks(2, colorsRegister);
+
+        // let Triangle[] triangles;
+
+        Message("Start");
+        for (V_1, V_2) in edges {
+            for V_idx in 0..V-1 {
+                if(isAnEdge(V_1, V_idx, edges) and isAnEdge(V_2, V_idx, edges)) {
+                    // triangle <V_1, V_2, V_idx> is a triangle
+                    // Qubit1 = getEdgeColour(V1 V2)
+                    // Qubit2 = getEdgeColour(V2 V3)
+                    // Qubit3 = getEdgeColour(V1 V3)
+                }
+                
+                // check if [V_1, V_idx] in edges
+
+                // if both yes then that's a triangle
+                
+            }
+        }
     }
 }
 

@@ -72,7 +72,7 @@ namespace QCHack.Task4 {
             for V_idx in 0..V-1 {
                 if(isAnEdge(V_1, V_idx, edges) and isAnEdge(V_2, V_idx, edges)) {
                     // triangle <V_1, V_2, V_idx> is a triangle
-                    Message("Triangle found!");
+                    // Message("Triangle found!");
                     let q1 = colorsRegister[getEdgeIdx(V_1, V_2, edges)];
                     let q2 = colorsRegister[getEdgeIdx(V_2, V_idx, edges)];
                     let q3 = colorsRegister[getEdgeIdx(V_1, V_idx, edges)];
@@ -90,29 +90,29 @@ namespace QCHack.Task4 {
                         ApplyControlledOnInt(0, X, [q3], anc1);
 
                         // if anc1 and anc2 are zero then coloured triangle!
-                        DumpMachine();
+                        // DumpMachine();
                         ApplyControlledOnBitString(IntAsBoolArray(0,2),X,[anc0, anc1],target_tri);
-                        DumpMachine();
+                        // DumpMachine();
 
                         // if target_tri == 1 we have a coloured triangle
                         // if target_tri == 0 we don't
                     } apply {
                         // set target to one if target_tri is one
                         // if target is already one don't flip
-                        DumpMachine();
-                        ApplyControlledOnInt(1, X, [target_tri], ColTriFound);
+                        // DumpMachine();
+                        // ApplyControlledOnInt(1, X, [target_tri], ColTriFound);
                         use anc2 = Qubit();
                         within {
                             // Apply if either is different
                             ApplyControlledOnInt(1, X, [target_tri], anc2);
                             ApplyControlledOnInt(1, X, [ColTriFound], anc2);
-                            // ApplyControlledOnBitString(IntAsBoolArray(3,2),X,[target_tri, ColTriFound],anc2);
+                            ApplyControlledOnBitString(IntAsBoolArray(3,2),X,[target_tri, ColTriFound],anc2);
                             // ApplyAnd(target_tri,ColTriFound,anc2);
-                            DumpMachine();
+                            // DumpMachine();
                         } apply {
                             CNOT(anc2,target);
                         }
-                        DumpMachine();
+                        // DumpMachine();
                     }
                 }
             }
